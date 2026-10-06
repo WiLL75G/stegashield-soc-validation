@@ -40,3 +40,33 @@ I am establishing what normal and inherited activity already exists in the envir
 This gives me a baseline for answering a simple question later:
 
 **Did this activity exist before the pilot, or did it appear because of something I introduced?**
+
+
+## Mac Host Baseline
+
+The Mac is the host system for my existing lab and also runs Splunk Enterprise for SOC investigation and correlation.
+
+Before continuing with the pilot, I documented the host resources and current system state.
+
+### Observed
+
+* Model: MacBook Air
+* Chip: Apple M2
+* CPU: 8 cores
+* Memory: 8 GB
+* macOS: 27.0.1
+* Build: 26A434
+* Primary interface: en0
+* IPv4 address: 192.168.146.66
+
+The host had sufficient resources to continue the existing lab, but resource usage matters because the Windows and Ubuntu VMs were already running during the baseline.
+
+Sensitive hardware identifiers such as the serial number and hardware UUID are intentionally excluded from the public documentation.
+
+### Analyst Interpretation
+
+The Mac is not being treated as a detection source for StegaShield.
+
+Its main role in this pilot is to provide the existing lab environment and host Splunk for investigation and correlation.
+
+Documenting its state gives me a reference point if resource or connectivity problems appear after additional pilot components are introduced.
