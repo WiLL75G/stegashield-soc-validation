@@ -146,13 +146,13 @@ The baseline included:
 * Splunk Universal Forwarder status
 * Existing telemetry
 
-![Windows system baseline](evidence/day-01/01-windows-system-baseline.png)
+![Windows system baseline](evidence/01-windows-system-baseline.png)
 
 Sysmon was already active and Splunk telemetry from the endpoint was searchable.
 
 This is important because later activity can be investigated using telemetry that existed before StegaShield was introduced.
 
-![Windows telemetry in Splunk](evidence/day-01/04-splunk-windows-telemetry-ingestion.png)
+![Windows telemetry in Splunk](evidence/04-splunk-windows-telemetry-ingestion.png)
 
 ## Ubuntu Server
 
@@ -162,7 +162,7 @@ The VM is using `192.168.64.12` on the lab network.
 
 I recorded its resources, storage, network interfaces, existing services, firewall configuration, Docker state, installed components, and existing background activity.
 
-![Ubuntu network baseline](evidence/day-01/05-ubuntu-network-baseline.png)
+![Ubuntu network baseline](evidence/05-ubuntu-network-baseline.png)
 
 One useful lesson from this stage was that the server was not a completely clean system.
 
@@ -178,7 +178,7 @@ The Windows endpoint and Ubuntu server must be able to communicate before I buil
 
 Ubuntu successfully reached the Windows endpoint at `192.168.64.17` with four ICMP replies and zero packet loss.
 
-![Ubuntu to Windows connectivity](evidence/day-01/10-ubuntu-to-windows-connectivity.png)
+![Ubuntu to Windows connectivity](evidence/10-ubuntu-to-windows-connectivity.png)
 
 This does not prove that the future HTTPS workflow works.
 
