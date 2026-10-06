@@ -236,7 +236,7 @@ Each Day repository will contain enough evidence to make the investigation repro
 
 # Pilot Plan
 
-## Day 1: Environment Baseline
+### [Day 1: Environment Baseline](ACTUAL-DAY-1-REPOSITORY-URL)
 
 Establish the state of the environment before introducing the pilot components.
 
