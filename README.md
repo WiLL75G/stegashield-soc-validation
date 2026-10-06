@@ -318,7 +318,7 @@ Completed investigations will be linked here.
 
 | Day | Investigation | Repository | Status |
 | --- | --- | --- | --- |
-| Day 1 | Environment Baseline | Link added after completion | Pending |
+| Day 1 | Environment Baseline | [View Repository](ACTUAL-DAY-1-REPOSITORY-URL) | Complete |
 | Day 2 | Dataset and Ground Truth | Link added after completion | Pending |
 | Day 3 | StegaShield and Clean Baseline | Link added after completion | Pending |
 | Day 4 | LSB Validation | Link added after completion | Pending |
