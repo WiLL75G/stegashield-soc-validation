@@ -1,91 +1,140 @@
-# StegaShield SOC Validation Pilot
+# StegaShield Detection Validation Pilot
 
-This repository documents my hands on evaluation of StegaShield from a SOC analyst and detection engineering perspective.
+## Overview
 
-The goal is not simply to see whether the tool produces an alert.
+I built this pilot to answer one main question:
 
-I want to understand what the signal means, what evidence supports it, where the detection has limitations, and how useful that signal becomes when correlated with endpoint, network, and application telemetry.
+**Can StegaShield distinguish known clean images from images I intentionally modify using steganography?**
+
+The goal is not simply to make the product generate an alert.
+
+I want to understand what the model detects, where it performs well, where it does not, and how useful its signal becomes when investigated alongside endpoint, network, and application evidence.
+
+This repository documents that process from environment baseline to final findings.
+
+## Why I Built This
+
+A network connection can show that an image was transferred.
+
+That does not prove the image contains hidden data.
+
+A detection alert can show that something looks suspicious.
+
+That does not automatically prove data exfiltration occurred.
+
+That distinction is what I want to investigate.
+
+Instead of treating one alert as the answer, I am establishing known ground truth first and then comparing StegaShield's results with the surrounding telemetry.
 
 ## Research Question
 
-Can StegaShield distinguish known clean images from images I intentionally modify using steganography?
+Can StegaShield distinguish known clean images from images intentionally modified using steganography under controlled conditions?
 
-From there, I will look at:
+I will also investigate:
 
-* Probability scores
+* How probability scores differ between clean and modified images
 * Correct and incorrect classifications
-* Repeatability
 * False positives and false negatives
-* Behavior outside the stated training scope
-* SOC investigation value when the result is correlated with other telemetry
-
-## Why I Am Testing This
-
-My previous image transfer lab taught me an important lesson.
-
-Seeing an image move across a network does not tell me whether that image contains hidden data.
-
-In that lab, Suricata gave me network visibility and I later created a rule that searched for a marker I already knew existed.
-
-That was useful, but it was not the same as detecting unknown steganography.
-
-This pilot takes the investigation one layer deeper by testing content aware analysis.
+* Repeatability across controlled tests
+* Behaviour outside the model's stated training scope
+* Whether additional telemetry improves analyst confidence
 
 ## Lab Architecture
 
 The pilot uses my existing M2 Mac home lab.
 
-```text
-Windows Endpoint
-      |
-      | HTTPS
-      v
-Ubuntu Server
-      |
-      | Content Analysis
-      v
-StegaShield
+### Windows VM
 
-Endpoint Telemetry: Sysmon
-Network Telemetry: Zeek
-SOC Platform: Splunk
+Simulated corporate endpoint.
+
+Used to store and transfer the controlled image samples.
+
+Telemetry includes Sysmon and Windows event logs.
+
+### Ubuntu 24.04 VM
+
+Controlled server environment.
+
+Planned components include:
+
+* HTTPS receiver
+* StegaShield
+* Zeek
+
+### Mac M2
+
+SOC analysis platform.
+
+Splunk Enterprise is used to investigate and correlate telemetry from the environment.
+
+## Investigation Flow
+
+```text
+Windows Activity
+      |
+Endpoint Telemetry
+      |
+HTTPS Transfer
+      |
+Network Telemetry
+      |
+Received Image
+      |
+StegaShield Analysis
+      |
+Splunk Correlation
+      |
+Analyst Interpretation
 ```
 
-### Windows
+Each layer answers a different question.
 
-Windows acts as the simulated corporate endpoint.
+No individual signal will be treated as proof of exfiltration by itself.
 
-It will hold the clean and controlled modified images and generate the endpoint activity used during the investigation.
+## Ground Truth
 
-### Ubuntu
+Ground truth is established before an image is submitted to StegaShield.
 
-Ubuntu acts as the controlled server environment.
+StegaShield does not decide whether my test sample is clean or modified.
 
-It will host the server side components required for the pilot, including StegaShield and later network monitoring.
+I establish that independently.
 
-### Splunk
+Each sample will be documented with information such as:
 
-Splunk is my central investigation platform.
+* Test ID
+* Parent image
+* Filename
+* Ground truth
+* SHA256 hash
+* File format
+* Dimensions
+* File size
+* Image source
+* Embedding method
+* Payload preparation
+* Payload size
+* Tool and version
+* StegaShield analysis ID
+* Probability score
+* Classification
+* Timestamp
+* Analyst notes
 
-The objective is to correlate evidence rather than treat one detection source as the complete answer.
+This allows every result to be traced back to a known sample.
 
-## Validation Approach
+## Validation Scope
 
-I am separating ground truth from detection.
+The primary validation focuses on Least Significant Bit steganography because this is the stated training scope for the model being evaluated.
 
-Before an image is submitted to StegaShield, I should already know whether that image is clean or intentionally modified.
+Testing begins with clean controls and controlled LSB samples.
 
-StegaShield does not define my ground truth.
+Additional techniques may later be tested separately to explore behaviour outside the stated training distribution.
 
-This allows me to compare what I know about the sample against what the model reports.
-
-The main validation begins with LSB steganography because that is the stated training scope of the model.
-
-Testing outside that scope will be treated separately as generalization testing rather than expected detection behavior.
+Those results will be treated as generalization testing rather than equivalent to the primary LSB validation.
 
 ## Investigation Method
 
-I am using the same investigation process I have been building across my SOC labs:
+I am using the same investigation process I use throughout my SOC lab work:
 
 ```text
 Baseline
@@ -100,141 +149,112 @@ Interpretation
 Evidence Gaps
 Disposition
 Detection Review
+Tuning
 Variation
 Repeat
 ```
 
-Throughout the pilot I will separate:
+Throughout the pilot I separate four important levels of analysis.
 
-**Observed**
+### Observed
 
 What the evidence directly shows.
 
-**Correlated**
+### Correlated
 
-What multiple evidence sources show when viewed together.
+What becomes visible when multiple evidence sources are connected.
 
-**Interpretation**
+### Interpretation
 
 What I believe the evidence means.
 
-**Unknown**
+### Unknown
 
-What the available evidence cannot prove.
+What the available evidence cannot establish.
 
-This distinction matters because a high probability score is a content signal. It is not automatically proof of malicious activity or data exfiltration.
+This distinction is important because a detection signal is evidence for investigation, not automatically proof of malicious activity.
 
-# Day 1: Environment Baseline
+## Pilot Plan
 
-I started the pilot by documenting the environment before installing StegaShield or Zeek and before creating any steganographic samples.
+### Day 1: Environment Baseline
 
-I wanted to know what already existed in the lab before introducing new components.
+Document the existing Windows, Ubuntu, Mac, Splunk, Sysmon, Docker, firewall, network, and background service state before introducing the pilot components.
 
-That gives me something to compare against later.
+### Day 2: Dataset and Ground Truth
 
-## Windows Endpoint
+Prepare the controlled dataset and establish independent ground truth before submitting samples to StegaShield.
 
-The Windows VM was documented before controlled testing.
+### Day 3: StegaShield and Clean Baseline
 
-The baseline included:
+Deploy StegaShield and establish how known clean images are scored before introducing controlled steganographic samples.
 
-* Operating system and build
-* CPU and memory
-* Storage
-* Network configuration
-* Sysmon status and configuration
-* Splunk Universal Forwarder status
-* Existing telemetry
+### Day 4: LSB Validation
 
-![Windows system baseline](evidence/01-windows-system-baseline.png)
+Test controlled LSB samples against their known clean counterparts and record the resulting probability scores and classifications.
 
-Sysmon was already active and Splunk telemetry from the endpoint was searchable.
+### Day 5: Error Analysis and Generalization
 
-This is important because later activity can be investigated using telemetry that existed before StegaShield was introduced.
+Investigate incorrect classifications, false positives, false negatives, repeatability, and behaviour outside the stated training scope.
 
-![Windows telemetry in Splunk](evidence/04-splunk-windows-telemetry-ingestion.png)
+### Day 6: HTTPS and SOC Investigation
 
-## Ubuntu Server
+Introduce the controlled HTTPS transfer path and correlate endpoint, network, application, and StegaShield evidence from an analyst perspective.
 
-Ubuntu was also documented before installing the pilot components.
+### Day 7: Reproduction and Findings
 
-The VM is using `192.168.64.12` on the lab network.
+Reproduce important results, document limitations and evidence gaps, review configuration, and produce the final findings.
 
-I recorded its resources, storage, network interfaces, existing services, firewall configuration, Docker state, installed components, and existing background activity.
-
-![Ubuntu network baseline](evidence/05-ubuntu-network-baseline.png)
-
-One useful lesson from this stage was that the server was not a completely clean system.
-
-It already contained services and inherited configuration from previous lab work.
-
-Instead of removing those immediately, I documented them first.
-
-That matters because existing activity can later appear in network telemetry and could otherwise be mistaken for pilot activity.
-
-## Connectivity Validation
-
-The Windows endpoint and Ubuntu server must be able to communicate before I build the HTTPS transfer path.
-
-Ubuntu successfully reached the Windows endpoint at `192.168.64.17` with four ICMP replies and zero packet loss.
-
-![Ubuntu to Windows connectivity](evidence/10-ubuntu-to-windows-connectivity.png)
-
-This does not prove that the future HTTPS workflow works.
-
-It proves something more basic:
-
-The two systems currently have IP connectivity.
-
-That distinction is important because each layer should be validated separately.
-
-## Day 1 Findings
-
-The baseline established that:
-
-* Windows and Ubuntu can communicate at the network layer.
-* Sysmon is already producing endpoint telemetry.
-* Windows telemetry is reaching Splunk.
-* Docker already exists on Ubuntu.
-* Ubuntu contains inherited services and configuration that must be considered during testing.
-* StegaShield has not yet been introduced into the controlled test workflow.
-* Zeek has not yet been introduced into the controlled test workflow.
-
-No steganography detection conclusions can be made from Day 1.
-
-That is intentional.
-
-Day 1 is about knowing the environment before changing it.
-
-## Current Architecture
+## Repository Structure
 
 ```text
-Windows VM
-192.168.64.17
-      |
-      | Network connectivity confirmed
-      |
-Ubuntu VM
-192.168.64.12
-
-Windows
-   |
-Sysmon
-   |
-Splunk Universal Forwarder
-   |
-Splunk
+stegashield-soc-validation/
+│
+├── README.md
+│
+├── investigations/
+│   └── stegashield-pilot/
+│       ├── day-01-baseline.md
+│       ├── day-02-dataset-ground-truth.md
+│       ├── day-03-clean-baseline.md
+│       ├── day-04-lsb-validation.md
+│       ├── day-05-error-analysis.md
+│       ├── day-06-soc-investigation.md
+│       └── day-07-findings.md
+│
+├── evidence/
+│   ├── day-01/
+│   ├── day-02/
+│   ├── day-03/
+│   ├── day-04/
+│   ├── day-05/
+│   ├── day-06/
+│   └── day-07/
+│
+└── dataset/
+    └── ground-truth.csv
 ```
 
-The next stages will introduce ground truth, controlled image samples, StegaShield analysis, and eventually the HTTPS and network telemetry layers.
+## What I Am Not Claiming
 
-## Pilot Progress
+A high StegaShield probability does not automatically prove malicious activity.
 
-| Day | Focus | Status |
-|---|---|---|
+An image upload does not automatically prove steganography.
+
+Steganography does not automatically prove data exfiltration.
+
+A missed technique outside the model's stated training distribution does not automatically mean the product failed.
+
+The final conclusion will be based on the evidence collected during the pilot.
+
+## Status
+
+**Pilot in progress**
+
+| Day | Investigation | Status |
+| --- | --- | --- |
 | Day 1 | Environment baseline | Complete |
 | Day 2 | Dataset and ground truth | Pending |
-| Day 3 | Clean image baseline | Pending |
+| Day 3 | StegaShield and clean baseline | Pending |
 | Day 4 | LSB validation | Pending |
 | Day 5 | Error analysis and generalization | Pending |
 | Day 6 | HTTPS and SOC investigation | Pending |
@@ -242,8 +262,6 @@ The next stages will introduce ground truth, controlled image samples, StegaShie
 
 ## Core Principle
 
-The main lesson I am carrying through this pilot is simple:
-
 **Telemetry is not detection, and detection is not automatically proof of malicious activity.**
 
-My job as the analyst is to understand what each source can prove, correlate the evidence, identify what remains unknown, and make a defensible conclusion.
+My role as the analyst is to understand what each source can prove, correlate the evidence, identify what remains unknown, and make a defensible conclusion.
