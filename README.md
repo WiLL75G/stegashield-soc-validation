@@ -60,7 +60,13 @@ The pilot will also investigate:
 
 ## Lab Architecture
 
+![StegaShield SOC Validation Lab Architecture](assets/stegashield-lab-architecture.png)
+
 The pilot uses my existing M2 Mac home lab.
+
+The architecture separates endpoint activity, server side processing, network visibility, content analysis, and SOC correlation.
+
+Some components shown in the architecture are part of the planned pilot environment and will be introduced during later stages of the investigation.
 
 ### Windows Endpoint
 
@@ -77,6 +83,8 @@ The planned investigation environment includes:
 * HTTPS receiver
 * StegaShield
 * Zeek
+
+These components are introduced and validated during the appropriate stages of the pilot rather than being treated as part of the original Day 1 baseline.
 
 ### Mac M2
 
@@ -244,7 +252,7 @@ The baseline covers Windows, Ubuntu, Mac, Splunk, Sysmon, Docker, firewall confi
 
 The purpose is to understand what already exists so later activity is not incorrectly attributed to StegaShield testing.
 
-## Day 2: Dataset and Ground Truth
+### [Day 2: Dataset and Ground Truth](ACTUAL-DAY-2-REPOSITORY-URL)
 
 Prepare the controlled image dataset and establish independent ground truth.
 
@@ -252,7 +260,7 @@ Each sample will receive a known identity before StegaShield analyzes it.
 
 This creates the foundation required to evaluate correct classifications, incorrect classifications, false positives, and false negatives.
 
-## Day 3: StegaShield and Clean Baseline
+### [Day 3: StegaShield and Clean Baseline](ACTUAL-DAY-3-REPOSITORY-URL)
 
 Deploy StegaShield and begin with known clean images.
 
@@ -260,7 +268,7 @@ The objective is to understand how the model behaves against clean controls befo
 
 This provides a clean image scoring baseline for later comparison.
 
-## Day 4: LSB Validation
+### [Day 4: LSB Validation](ACTUAL-DAY-4-REPOSITORY-URL)
 
 Introduce controlled Least Significant Bit steganography samples.
 
@@ -268,7 +276,7 @@ Known clean images will be compared with their intentionally modified counterpar
 
 Probability scores, classifications, repeatability, and differences between the samples will be documented.
 
-## Day 5: Error Analysis and Generalization
+### [Day 5: Error Analysis and Generalization](ACTUAL-DAY-5-REPOSITORY-URL)
 
 Investigate incorrect classifications and unusual results.
 
@@ -276,7 +284,7 @@ This stage will examine false positives, false negatives, repeatability, and pos
 
 Testing outside the stated LSB training scope may also be introduced separately to explore model generalization.
 
-## Day 6: HTTPS and SOC Investigation
+### [Day 6: HTTPS and SOC Investigation](ACTUAL-DAY-6-REPOSITORY-URL)
 
 Move from isolated content testing into a controlled SOC investigation.
 
@@ -284,7 +292,7 @@ The HTTPS transfer path will be introduced and evidence will be correlated acros
 
 The objective is to understand what an analyst can establish when endpoint, network, application, and StegaShield evidence are investigated together.
 
-## Day 7: Reproduction and Findings
+### [Day 7: Reproduction and Findings](ACTUAL-DAY-7-REPOSITORY-URL)
 
 Reproduce important findings and review the complete evidence chain.
 
